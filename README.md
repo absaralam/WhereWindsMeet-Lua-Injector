@@ -174,8 +174,6 @@ The system `dinput8.dll` in `C:\Windows\System32\` remains untouched.
   pip install frida
   ```
 
-`argparse` and `json` are included in Python’s standard library, so nothing extra is needed for them.
-
 ### 4. Check / adjust `frida-gadget.config` (optional)
 
 By default, the config is expected to:
