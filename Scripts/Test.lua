@@ -49,12 +49,3 @@ end
 -- ========= EXECUTION =========
 modify_flags(ROOT, ROOT_NAME .. ".", 0)
 print("[OK] Modification des flags terminée.")
-
-
--- safe-load de gm_menu_translator.lua
-do
-  local ok, err = pcall(dofile, [[C:\temp\Where Winds Meet\Scripts\gm_menu_translator.lua]])
-  if not ok then
-    print("[gm_menu_translator] load failed:", err)
-  end
-end
