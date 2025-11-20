@@ -314,12 +314,52 @@ To turn it into a more serious / robust project, you would probably want to:
 
 ---
 
-## Status
+## Status (edited after recent game patches)
 
 - ✅ Verified that:
   - The game uses a **custom Lua 5.4 VM**.
-  - It is possible to **inject and run custom Lua scripts**.
-  - Debug / GM related behavior can be toggled via Lua.
+  - It is still possible to **inject and run custom Lua scripts**.
+  - Debug / GM-related behavior can be toggled via Lua.
+
+- 🛠️ GM / debug behavior (post-patch):
+  - Recent game updates **patched the opening of the in-game GM / debug menu UI**.
+  - However, the underlying **GM functions are still callable directly from Lua**.
+    For example, to control invincibility:
+
+    ```lua
+    -- Enable invincibility
+    package.loaded["hexm.client.debug.gm.gm_commands.gm_combat"].gm_set_invincible(1)
+
+    -- Disable / toggle invincibility
+    package.loaded["hexm.client.debug.gm.gm_commands.gm_combat"].gm_set_invincible()
+    ```
+
+  - `Dump_env.lua` is useful to find **all GM-related functions** that correspond to the (now patched) GM menu features.
+  - I also recommend using `Trace_call.lua` to **analyze which internal functions (and with which arguments)** are actually called by these GM helpers before their removal.
+    Example of a trace for what is really called inside `gm_set_invincible`:
+
+    ```text
+    Enable invincibility :
+    CALL add_buff (hexm/client/fake_server/entities/common_members/buff_base.lua:167)  args: (self=<instance of FakePlayerAvatar at 26BDE726660>, buff_no=70063, fromid="XXXXXXXXXXX", kwargs={level: 1})
+      CALL get_buff_sys_d (hexm/common/misc/buff_misc.lua:13)  args: (buff_no=70063, level=nil)
+      RET  get_buff_sys_d (hexm/common/misc/buff_misc.lua:13)
+      CALL is_client_buff (hexm/common/consts/buff_consts.lua:189)  args: (sys_d={ignore_behit_type: 3, buff_destroy_fromer: [1, 1, 1, 1], buff_estimate: 1, buff_control_type: 0, buff_destroy_cond: 0, immune_damage: [1, 2], immnue_damage_times: [-1, 0], is_client_display: 0, buff_id: 70063, buff_show_flag: 1, immune_all_controlbuff: 1, has_fake_need: 1, buff_destroy_owner: [1, 1, 1, 1], buff_specialshow_priority: 1, buff_name: -3307847279787213631, has_anti_need: 1, buff_maxtime: -1.0, buff_show_priority: 1, buff_type: 1})
+      RET  is_client_buff (hexm/common/consts/buff_consts.lua:189)
+    RET  add_buff (hexm/client/fake_server/entities/common_members/buff_base.lua:167)
+
+    Disable invincibility : 
+    CALL remove_buffs_by_No (hexm/client/fake_server/entities/common_members/buff_base.lua:239)  args: (self=<instance of FakePlayerAvatar at 26BDE726660>, buffs_no=70063, fromid=0)
+      CALL get_buff_by_No (hexm/client/entities/server/common_members/buff_base.lua:73)  args: (self=<instance of PlayerAvatar at 26BD550CB00>, buff_no=70063, fromid=0)
+      RET  get_buff_by_No (hexm/client/entities/server/common_members/buff_base.lua:73)
+      CALL _check_call_buffs (hexm/client/fake_server/entities/common_members/buff_base.lua:207)  args: (self=<instance of FakePlayerAvatar at 26BDE726660>, fname="remove_buffs_by_No", buffs_no=[70063], ...1=0)
+      RET  _check_call_buffs (hexm/client/fake_server/entities/common_members/buff_base.lua:207)
+      CALL remove_buffs_by_No (hexm/common/combat/buff/buff_comp.lua:253)  args: (self=<instance of CombatBuffComp at 26BDE72F670>, buffs_no=[70063], fromid=0, reason=nil, rtype=nil)
+        CALL get_bids_by_No (hexm/common/combat/buff/buff_comp.lua:177)  args: (self=<instance of CombatBuffComp at 26BDE72F670>, buffs_no=[70063], fromid=0)
+        RET  get_bids_by_No (hexm/common/combat/buff/buff_comp.lua:177)
+      RET  remove_buffs_by_No (hexm/common/combat/buff/buff_comp.lua:253)
+    RET  remove_buffs_by_No (hexm/client/fake_server/entities/common_members/buff_base.lua:239)
+    ```
+
 - ⚠️ PoC quality only:
   - Uses Frida + Gadget.
   - No guarantees on compatibility or stability.
