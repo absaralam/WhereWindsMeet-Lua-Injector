@@ -76,7 +76,7 @@ local ok, err = pcall(function()
   }
 
   -- On limite le nombre d'arguments loggés
-  local MAX_ARGS = 5
+  local MAX_ARGS = 10
 
   ---------------------------------------------------------------------------
   -- Helpers
@@ -282,3 +282,4 @@ if not ok then
     ef:close()
   end
 end
+
